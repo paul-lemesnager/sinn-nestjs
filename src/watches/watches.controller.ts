@@ -31,10 +31,10 @@ export class WatchesController {
   }
 
   @Post()
-  createWatch(
+  async createWatch(
     @Body() createWatchDto: CreateWatchDto
-  ): Watch {
-    const watch = this.watchesService.addWatch(createWatchDto);
+  ) {
+    const watch = await this.watchesService.addWatch(createWatchDto);
     return watch;
   }
 

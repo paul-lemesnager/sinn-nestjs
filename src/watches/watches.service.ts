@@ -2,20 +2,24 @@
 https://docs.nestjs.com/providers#services
 */
 
+import { Model } from "mongoose";
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
 import { CreateWatchDto } from "./create-watch.dto";
 import { UpdateWatchDto } from "./update-watch.dto";
-import { Watch } from "./watch.model";
+import { Watch, WatchDocument } from "./watch.schema";
 
 @Injectable()
 export class WatchesService {
-  private watches: Watch[] = [];
+  private watches: any[] = [];
 
-  addWatch(createWatchDto: CreateWatchDto): Watch {
-    const id = (Math.floor(Math.random() * 10000) + 1).toString();
-    const watch = new Watch(id, createWatchDto.title, createWatchDto.description, createWatchDto.price);
-    this.watches.push(watch);
-    return watch;
+  constructor(@InjectModel(Watch.name) private readonly watchModel: Model<WatchDocument>) {}
+
+  async addWatch(createWatchDto: CreateWatchDto) {
+    const watch = new this.watchModel(createWatchDto);
+    const addedWatch = await watch.save();
+    console.log(addedWatch);
+    return addedWatch;
   }
 
   getWatches() {
@@ -27,7 +31,7 @@ export class WatchesService {
     return { ...watch };
   }
 
-  updateWatch(id: string, updateWatchDto: UpdateWatchDto): Watch {
+  updateWatch(id: string, updateWatchDto: UpdateWatchDto) {
     const [watch, index] = this.findWatch(id);
 
     const updatedWatch = { id: id, ...updateWatchDto };
@@ -42,7 +46,7 @@ export class WatchesService {
     this.watches.splice(index, 1);
   }
 
-  private findWatch(id: string): [Watch, number] {
+  private findWatch(id: string): [any, number] {
     const watchIndex = this.watches.findIndex((watch) => watch.id === id);
     const watch = this.watches[watchIndex];
     if (!watch) {
