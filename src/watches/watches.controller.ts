@@ -11,6 +11,9 @@ import {
   Post,
   Delete,
 } from "@nestjs/common";
+import { CreateWatchDto } from "./create-watch.dto";
+import { UpdateWatchDto } from "./update-watch.dto";
+import { Watch } from "./watch.model";
 import { WatchesService } from "./watches.service";
 
 @Controller("watches")
@@ -18,44 +21,37 @@ export class WatchesController {
   constructor(private watchesService: WatchesService) {}
 
   @Get()
-  getAllWatches() {
+  getAllWatches(): Watch[] {
     return this.watchesService.getWatches();
   }
 
   @Get(":id")
-  findById(@Param("id") id: string) {
+  findById(@Param("id") id: string): Watch {
     return this.watchesService.getWatch(id);
   }
 
   @Post()
   createWatch(
-    @Body("title") title: string,
-    @Body("description") description: string,
-    @Body("price") price: number
-  ) {
-    const watchId = this.watchesService.addWatch(title, description, price);
-    return { id: watchId };
+    @Body() createWatchDto: CreateWatchDto
+  ): Watch {
+    const watch = this.watchesService.addWatch(createWatchDto);
+    return watch;
   }
 
   @Patch(":id")
   updateWatch(
     @Param("id") id: string,
-    @Body("title") title: string,
-    @Body("description") description: string,
-    @Body("price") price: number
-  ) {
-    const watchId = this.watchesService.updateWatch(
+    @Body() updateWatchDto: UpdateWatchDto
+  ): Watch {
+    const watch = this.watchesService.updateWatch(
       id,
-      title,
-      description,
-      price
+      updateWatchDto
     );
-    return { id: watchId };
+    return watch;
   }
 
   @Delete(":id")
-  deleteWatch(@Param("id") id: string) {
+  deleteWatch(@Param("id") id: string): void {
     this.watchesService.deleteWatch(id);
-    return null;
   }
 }

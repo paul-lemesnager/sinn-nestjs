@@ -3,17 +3,19 @@ https://docs.nestjs.com/providers#services
 */
 
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { CreateWatchDto } from "./create-watch.dto";
+import { UpdateWatchDto } from "./update-watch.dto";
 import { Watch } from "./watch.model";
 
 @Injectable()
 export class WatchesService {
   private watches: Watch[] = [];
 
-  addWatch(title: string, description: string, price: number) {
-    const id = Math.random().toString();
-    const watch = new Watch(id, title, description, price);
+  addWatch(createWatchDto: CreateWatchDto): Watch {
+    const id = (Math.floor(Math.random() * 10000) + 1).toString();
+    const watch = new Watch(id, createWatchDto.title, createWatchDto.description, createWatchDto.price);
     this.watches.push(watch);
-    return id;
+    return watch;
   }
 
   getWatches() {
@@ -25,26 +27,14 @@ export class WatchesService {
     return { ...watch };
   }
 
-  updateWatch(id: string, title: string, description: string, price: number) {
+  updateWatch(id: string, updateWatchDto: UpdateWatchDto): Watch {
     const [watch, index] = this.findWatch(id);
 
-    const updatedWatch = { ...watch };
+    const updatedWatch = { id: id, ...updateWatchDto };
 
-    if (title) {
-      updatedWatch.title = title;
-    }
+    this.watches[index] = { id: id, ...updateWatchDto };
 
-    if (description) {
-      updatedWatch.description = description;
-    }
-
-    if (price) {
-      updatedWatch.price = price;
-    }
-
-    this.watches[index] = { ...updatedWatch };
-
-    return updatedWatch.id;
+    return updatedWatch;
   }
 
   deleteWatch(id: string) {
