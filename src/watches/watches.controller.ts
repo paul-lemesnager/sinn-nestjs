@@ -21,13 +21,15 @@ export class WatchesController {
   constructor(private watchesService: WatchesService) {}
 
   @Get()
-  getAllWatches(): Watch[] {
-    return this.watchesService.getWatches();
+  async getAllWatches()  {
+    const watches = await this.watchesService.getWatches();
+    return watches;
   }
 
   @Get(":id")
-  findById(@Param("id") id: string): Watch {
-    return this.watchesService.getWatch(id);
+  async findById(@Param("id") id: string) {
+    const watch = await this.watchesService.getWatch(id);
+    return watch;
   }
 
   @Post()
@@ -39,11 +41,11 @@ export class WatchesController {
   }
 
   @Patch(":id")
-  updateWatch(
+  async updateWatch(
     @Param("id") id: string,
     @Body() updateWatchDto: UpdateWatchDto
-  ): Watch {
-    const watch = this.watchesService.updateWatch(
+  ) {
+    const watch = await this.watchesService.updateWatch(
       id,
       updateWatchDto
     );
@@ -51,7 +53,7 @@ export class WatchesController {
   }
 
   @Delete(":id")
-  deleteWatch(@Param("id") id: string): void {
-    this.watchesService.deleteWatch(id);
+  async deleteWatch(@Param("id") id: string): Promise<void> {
+    await this.watchesService.deleteWatch(id);
   }
 }

@@ -11,47 +11,55 @@ import { Watch, WatchDocument } from "./watch.schema";
 
 @Injectable()
 export class WatchesService {
-  private watches: any[] = [];
 
   constructor(@InjectModel(Watch.name) private readonly watchModel: Model<WatchDocument>) {}
 
-  async addWatch(createWatchDto: CreateWatchDto) {
-    const watch = new this.watchModel(createWatchDto);
-    const addedWatch = await watch.save();
-    console.log(addedWatch);
-    return addedWatch;
+  async addWatch(createWatchDto: CreateWatchDto): Promise<Watch> {
+    const watch = await new this.watchModel(createWatchDto).save();
+    return watch as Watch;
   }
 
-  getWatches() {
-    return [...this.watches];
+  async getWatches(): Promise<Watch[]> {
+    const watches = await this.watchModel.find().exec();
+    return watches;
   }
 
-  getWatch(id: string) {
-    const watch = this.findWatch(id)[0];
-    return { ...watch };
+  async getWatch(id: string): Promise<Watch> {
+    const watch = await this.findWatch(id);
+    return watch;
   }
 
-  updateWatch(id: string, updateWatchDto: UpdateWatchDto) {
-    const [watch, index] = this.findWatch(id);
+  async updateWatch(id: string, updateWatchDto: UpdateWatchDto) {
+    const updatedWatch = await this.findWatch(id);
 
-    const updatedWatch = { id: id, ...updateWatchDto };
+    if(updateWatchDto.title) updatedWatch.title = updateWatchDto.title;
+    if(updateWatchDto.description) updatedWatch.description = updateWatchDto.description;
+    if(updateWatchDto.price) updatedWatch.price = updateWatchDto.price;
 
-    this.watches[index] = { id: id, ...updateWatchDto };
+    updatedWatch.save();
 
     return updatedWatch;
   }
 
-  deleteWatch(id: string) {
-    const index = this.findWatch(id)[1];
-    this.watches.splice(index, 1);
+  async deleteWatch(id: string) {
+    const result = await this.watchModel.deleteOne({ id: id }).exec();
+    
+    if(result.deletedCount === 0) {
+      throw new NotFoundException("Could not find watch.");
+    }
   }
 
-  private findWatch(id: string): [any, number] {
-    const watchIndex = this.watches.findIndex((watch) => watch.id === id);
-    const watch = this.watches[watchIndex];
+  private async findWatch(id: string): Promise<WatchDocument> {
+    let watch;
+    try {
+      watch = await this.watchModel.findById(id).exec();
+    } catch (error) {
+      throw new NotFoundException("Could not find watch.");
+    }
+
     if (!watch) {
       throw new NotFoundException("Could not find watch.");
     }
-    return [watch, watchIndex];
+    return watch;
   }
 }

@@ -11,7 +11,7 @@ export class Watch {
   @Prop({required: true})
   price: number;
 
-  @Prop()
+  @Prop({required: true})
   description: string;
 }
 
