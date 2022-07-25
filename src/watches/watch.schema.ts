@@ -13,6 +13,30 @@ export class Watch {
 
   @Prop({required: true})
   description: string;
+
+  @Prop()
+  shortDescription: string;
+
+  @Prop()
+  images: string[];
+
+  @Prop()
+  warranty: number;
+
+  @Prop()
+  dimension: number[];
+
+  @Prop()
+  video: string;
+
+  @Prop()
+  docs: string;
+
+  @Prop()
+  movement: string;
+
+  @Prop()
+  specs: string[];
 }
 
 export const WatchSchema = SchemaFactory.createForClass(Watch);
